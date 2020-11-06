@@ -101,6 +101,11 @@ public class ConnectionTest {
     }
 
     // 方式五：final版，将数据库连接需要的4个基本信息声明在配置文件中，通过读取配置文件的方式，获取连接
+    /*
+    这样做的好处？
+        1. 实现了数据与代码的分离，实现了解耦
+        2. 如果需要修改配置信息，可以避免程序重新打包
+     */
     @Test
     public void testConnection5() throws Exception {
         // 1. 读取配置文件的信息
@@ -108,10 +113,24 @@ public class ConnectionTest {
         // getResourceAsStream()的默认识别路径就是src目录下，作用获取类路径下指定文件的输入流对象
         InputStream resourceAsStream = ConnectionTest.class.getClassLoader().getResourceAsStream("jdbc.properties");
 
+        // 2. 转载配置信息
         Properties properties = new Properties();
         properties.load(resourceAsStream); // 加载配置文件信息
 
+        // 3. 提取字段信息
+        String user = properties.getProperty("user");
+        String password = properties.getProperty("password");
+        String url = properties.getProperty("url");
+        String driverClass = properties.getProperty("driverClass");
 
+        // 4. 获取Driver实现类对象
+        Class.forName(driverClass);
 
+        // 5. 获取连接
+        Connection connection = DriverManager.getConnection(url, user, password);
+        System.out.println(connection);
+
+        // 6. 关闭连接
+        connection.close();
     }
 }
