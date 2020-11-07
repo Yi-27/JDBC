@@ -55,7 +55,20 @@ public class ConnectionTest {
         // 4. 建立连接
         Connection connect = driver.connect(url, info);
         System.out.println(connect);
+        System.out.println(connect.isClosed());
         connect.close();
+        System.out.println(connect);
+        System.out.println(connect.isClosed());
+
+        Connection connect2 = driver.connect(url, info);
+        System.out.println(connect2);
+        if (connect.equals(connect2)){
+            System.out.println("两个连接是同一个连接");
+        }else if(connect == connect2){
+            System.out.println("两个连接可能是同一个连接");
+        }else {
+            System.out.println("两个连接不是同一个连接");
+        }
     }
 
     // 方式三：使用DriverManager替换Driver
@@ -96,9 +109,20 @@ public class ConnectionTest {
         Connection connection = DriverManager.getConnection(url, user, password);
         System.out.println(connection);
 
+        Connection connection2 = DriverManager.getConnection(url, user, password);
+        System.out.println(connection2);
+        if (connection.equals(connection2)){
+            System.out.println("两个连接是同一个连接");
+        }else if(connection == connection2){
+            System.out.println("两个连接可能是同一个连接");
+        }else {
+            System.out.println("两个连接不是同一个连接");
+        }
         // 关闭连接
         connection.close();
     }
+
+
 
     // 方式五：final版，将数据库连接需要的4个基本信息声明在配置文件中，通过读取配置文件的方式，获取连接
     /*
