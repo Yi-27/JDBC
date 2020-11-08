@@ -3,6 +3,8 @@ package com.example.dao;
 import com.example.utils.JDBCUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +16,41 @@ import java.util.List;
  * @Description:
  *  通用的基础Dao（Data Access Object）
  *  封装了针对数据表的通用操作
+ *  声明为abstract类，不能直接用来实例化
  */
-public class BaseDao {
+public abstract class BaseDao<T> {
 
+    /*
+    该抽象类，加入泛型，使其能用更多情况下
+    目的是为了该抽象类的实现类中调用下面的方法由于很明确是针对哪个bean对象来操作的，
+    因此在方法中就可以省略Class<T> clazz
+        即，原本对于Customers表的DaoImpl中
+        调用下面的方法，需要指定Customer.class
+        这是可以省略的，因为很明确是哪个类来调用了
+
+     那么。如果能在该BaseDao中想办法获取到是针对哪个表哪个Bean对象来操作的，就好办了
+     而 泛型 + 反射 就能很好的解决这个问题
+
+     当然不省略也是可以的，并没有多大的影响
+     */
+    Class<T> clazz = null;
+    {
+        // 通过 实现类（当前抽象类的子类） 获取 其继承的当前抽象类 的 泛型
+        Type genericSuperclass = this.getClass().getGenericSuperclass(); // 获取带泛型的父类
+        System.out.println("genericSuperclass = " + genericSuperclass); // com.example.dao.BaseDao<com.example.bean.Customer>
+        ParameterizedType paramType = (ParameterizedType) genericSuperclass; // 强转成带参数的泛型
+        System.out.println("paramType = " + paramType); // com.example.dao.BaseDao<com.example.bean.Customer>
+
+        // 获取父类中泛型中的参数 可能是多个，但对于当前情况是一个
+        Type[] typeArguments = paramType.getActualTypeArguments();
+        System.out.println("typeArguments[0] = " + typeArguments[0]); // class com.example.bean.Customer
+
+        // 泛型的第一个参数，比如获取到lCustomer，在强转成类对象
+        // 这里强转的原因：从上面的打印可以看到 typeArguments[0]的确是个类，但是由于他现在是Type对象，需要转成类对象后续才能使用
+        // 另外，Class类 实现了 Type 接口，这也是多态的使用情况
+        clazz = (Class<T>) typeArguments[0];
+        System.out.println("clazz = " + clazz); // class com.example.bean.Customer
+    }
 
 
     /**
@@ -28,14 +62,14 @@ public class BaseDao {
      * @Param: [conn, clazz, sql, args]
      * @return: java.util.List<T>
      */
-    public <T> List<T> commonQuery(Connection conn, Class<T> clazz, String sql, Object ...args){
+    public List<T> commonQuery(Connection conn, String sql, Object ...args){
         PreparedStatement ps = null;
         ResultSet resultSet = null;
 
         try {
             // 2. 预编译SQL语句
             ps = conn.prepareStatement(sql);
-            // 3. 向占位符填入数据
+            // 3. 向占位符填入数据 没有占位符这里就不用考虑了
             for (int i = 0; i < args.length; i++) {
                 ps.setObject(i+1, args[i]);
             }
@@ -125,17 +159,29 @@ public class BaseDao {
     }
 
 
-    public void getValue(Connection conn, String sql, Object ...args) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement(sql);
-        // 填充占位符
-        for (int i = 0; i < args.length; i++) {
-            ps.setObject(i+1, args[i]);
+    public <E> E getValue(Connection conn, String sql, Object ...args) {
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+        try {
+            ps = conn.prepareStatement(sql);
+            // 填充占位符
+            for (int i = 0; i < args.length; i++) {
+                ps.setObject(i+1, args[i]);
+            }
+
+            // 执行
+            resultSet = ps.executeQuery();
+            if (resultSet.next()){
+                return (E) resultSet.getObject(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // 关闭资源
+            JDBCUtils.closeResource(null, ps, resultSet);
         }
 
-        // 执行
-        ResultSet resultSet = ps.executeQuery();
-//        if ()
-
+        return null;
     }
 
 }

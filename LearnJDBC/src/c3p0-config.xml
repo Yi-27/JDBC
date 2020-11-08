@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c3p0-config>
+
+    <named-config name="helloc3p0">
+        <!-- 提供获取连接的4个基本信息 -->
+        <property name="driverClass">com.mysql.jdbc.Driver</property>
+        <!-- 如果是在本机上运行 可以省略 localhost:3306 -->
+        <!-- xml中不支持直接用 &。要替换成 &amp;-->
+        <property name="jdbcUrl">jdbc:mysql:///jdbc_test?useUnicode=true&amp;characterEncoding=utf8&amp;rewriteBatchedStatements=true</property>
+        <property name="user">root</property>
+        <property name="password">rootroot</property>
+
+        <!-- 进行数据库连接池管理的基本信息 -->
+        <!-- 当数据库连接池中的连接数不够时，c3p0一次性向数据库服务器申请的连接数-->
+        <property name="acquireIncrement">5</property>
+        <!-- 连接池初始化时的连接数 -->
+        <property name="initialPoolSize">10</property>
+        <!-- 连接池维护的最少连接数 -->
+        <property name="minPoolSize">10</property>
+        <!-- 连接池维护的最多连接数 -->
+        <property name="maxPoolSize">100</property>
+        <!-- 连接池最多维护的Statement的个数 -->
+        <property name="maxStatements">50</property>
+        <!-- 每个连接中可以最多使用的Statement的个数-->
+        <property name="maxStatementsPerconnection">2</property>
+
+        <!--&lt;!&ndash; 连接池的编码&ndash;&gt;-->
+        <!--<property name="useUnicode">true</property>-->
+        <!--<property name="characterEncoding">utf8</property>-->
+        <!--&lt;!&ndash; 连接池开启批处理&ndash;&gt;-->
+        <!--<property name="rewriteBatchedStatements">true</property>-->
+
+
+    </named-config>
+</c3p0-config>

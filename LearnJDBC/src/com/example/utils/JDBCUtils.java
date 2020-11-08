@@ -1,6 +1,7 @@
 package com.example.utils;
 
 import com.example.crud.PreparedStatementUpdateTest;
+import org.apache.commons.dbutils.DbUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,6 @@ public class JDBCUtils {
     /**
      * @Date: 2020/11/6 10:23
      * @Description: 获取数据库连接操作
-     *
      * @Param: []
      * @return: java.sql.Connection
      */
@@ -43,11 +43,10 @@ public class JDBCUtils {
     /**
      * @Date: 2020/11/6 10:27
      * @Description: 关闭资源，这里不用preparedStatement是因为用Statement是多态的用法
-     *
      * @Param: [is, conn, statement]
      * @return: void
-     */        
-    public static void closeResource(Connection conn, Statement statement){
+     */
+    public static void closeResource(Connection conn, Statement statement) {
         // 关闭资源
         try {
             if (statement != null)
@@ -66,10 +65,9 @@ public class JDBCUtils {
     /**
      * @Date: 2020/11/6 12:29
      * @Description: 重载关闭资源方法，用于查询操作
-     *
      * @Param: [conn, statement, resultSet]
      * @return: void
-     */        
+     */
     public static void closeResource(Connection conn, Statement statement, ResultSet resultSet) {
         // 关闭资源
         closeResource(conn, statement);
@@ -79,5 +77,33 @@ public class JDBCUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @Date: 2020/11/8 21:48
+     * @Description:
+     *      使用dbUtils关闭连接，其实都一样
+     * @Param: [conn, statement, resultSet]
+     * @return: void
+     */
+    public static void closeResource2(Connection conn, Statement statement, ResultSet resultSet) {
+
+//        try {
+//            DbUtils.close(conn);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            DbUtils.close(statement);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            DbUtils.close(resultSet);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+        DbUtils.closeQuietly(conn, statement, resultSet);
+        // 这内部的代码与自己写的上面的代码一模一样
     }
 }
